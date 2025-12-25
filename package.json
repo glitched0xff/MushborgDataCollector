@@ -1,0 +1,30 @@
+{
+  "name": "mushborgdatacollector",
+  "version": "0.0.1",
+  "description": "Mushborg data collector receive message and store in db Mushborg",
+  "homepage": "https://github.com/glitched0xff/MushborgDataCollector#readme",
+  "bugs": {
+    "url": "https://github.com/glitched0xff/MushborgDataCollector/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/glitched0xff/MushborgDataCollector.git"
+  },
+  "license": "AGPL-3.0-or-later",
+  "author": "Glitched0xff",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "mariadb": "^3.4.5",
+    "mqtt": "^5.14.1",
+    "mysql2": "^3.16.0",
+    "sequelize": "^6.37.7",
+    "zod": "^4.2.1"
+  }
+}
