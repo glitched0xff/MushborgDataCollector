@@ -9,22 +9,31 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING
       },
       temp: {
-        type: Sequelize.STRING
+        type: Sequelize.FLOAT
       },
-      hum: {
-        type: Sequelize.STRING
+      hume: {
+        type: Sequelize.FLOAT
+      },
+      hums: {
+        type: Sequelize.FLOAT
       },
       co2: {
-        type: Sequelize.BOOLEAN
+        type: Sequelize.FLOAT
+      },
+      levl: {
+        type: Sequelize.FLOAT
+      },
+      ligh: {
+        type: Sequelize.FLOAT
+      },
+      wind: {
+        type: Sequelize.FLOAT
+      },
+      battery:{
+        type: Sequelize.FLOAT
       },
       status:{
-        type: Sequelize.BOOLEAN
-      },
-      flag01:{
-        type: Sequelize.BOOLEAN
-      },
-      flag02:{
-        type: Sequelize.BOOLEAN
+        type: Sequelize.INTEGER
       },
       deviceId:{
         type: Sequelize.INTEGER

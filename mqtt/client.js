@@ -7,11 +7,12 @@ const client = mqtt.connect(process.env.MQTT_BROKER, {
 });
 
 client.on('connect', () => {
-  console.log('✔️ MQTT connected');
-  client.subscribe(process.env.MQTT_TOPIC);
+  console.log('✔️ MQTT connected'); 
+  client.subscribe("#");
 });
 
 client.on('message', (topic, payload) => {
+  console.log(topic)
   handleMessage(topic, payload.toString());
 });
 
