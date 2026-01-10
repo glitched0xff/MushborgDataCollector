@@ -9,7 +9,9 @@ module.exports = async function sendMessage(topic, message) {
           reconnectPeriod: 0
         });
         mqttClient.once('connect', () => {
+          
            mqttClient.publish(topic,JSON.stringify(message),{ qos: 1 },err => {
+            console.log("published")
           if (err) {
             mqttClient.end();
             reject(err);

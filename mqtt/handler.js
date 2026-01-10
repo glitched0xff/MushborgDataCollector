@@ -15,16 +15,36 @@ const schema = z.object({
     co2:z.number().optional(),
 });
 
+const isValidJSON = (text) => {
+  let isValid = false;
+
+  if (typeof text !== 'string' || (typeof text === 'string' && text.length === 0)) {
+    return isValid;
+  }
+
+  try {
+    JSON.parse(text);
+    isValid = true;
+  } catch (e) {
+    console.error('[isValidJSON], invalid JSON text', text);
+  }
+
+  return isValid;
+}
+
 module.exports = async function handleMessage(topic, message) {
+  if (isValidJSON(message)){
     let data = schema.safeParse(JSON.parse(message));
     if (!data.success) {
       return false // ZodError instance
     } else {
-      data=data.data; // { username: string; xp: number }
+      data=data.data; 
     }
     console.log(data)
     // Creazione del sensore se non presente
     let sensorRecord= await db.device.count({where:{cod_device:data.cod_device,type:data.type,active:1}})
+    console.log(sensorRecord)
+
     if(sensorRecord==0){
       let presentFied={
         temp:0,
@@ -61,6 +81,7 @@ module.exports = async function handleMessage(topic, message) {
 
     let device= await db.device.findOne({where:{cod_device:data.cod_device},attribute:["id","sorageId"]})
     // Inserimento messaggio
+    
     if (device.type=="S"){
       await db.sensorData.create({
         cod_device:data.cod_device,
@@ -125,4 +146,5 @@ module.exports = async function handleMessage(topic, message) {
         }
       }
       }
+  }
 };
