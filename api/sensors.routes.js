@@ -62,15 +62,15 @@ router.get('/sendMessage', (req, res) => {
 
 
 router.post('/rxEcowitt',async (req,res)=>{
-  console.log(req.body)
-  console.log(ecowittConfig)
+  //console.log(req.body)
+  //console.log(ecowittConfig)
   let ecowittData=req.body
   ecowittConfig.devices.forEach(async dev => {
-    console.log(dev)
+    //console.log(dev)
     if (ecowittData.PASSKEY==dev.passkey){
-      console.log(ecowittData[dev.temp[0]])
+      //console.log(ecowittData[dev.temp[0]])
       if (dev.temp[1]=="F"){ ecowittData[dev.temp[0]]=(((parseFloat(ecowittData[dev.temp[0]])-32)*5)/9).toPrecision(2)}
-      console.log(ecowittData[dev.temp[0]])
+      //console.log(ecowittData[dev.temp[0]])
       let payload={
         cod_device:dev.cod_device,
         type:dev.type,
@@ -87,6 +87,7 @@ router.post('/rxEcowitt',async (req,res)=>{
       for(let key in payload){
         if(payload[key]==null){delete payload[key]}
       }
+      console.log("Ecowitt "+dev.cod_device)
       console.log(payload)
 
       await sender(dev.topic,payload)
