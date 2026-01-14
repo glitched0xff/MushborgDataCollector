@@ -2,7 +2,7 @@
 const db = require("../db");
 
 const logOutMqtt=async(act, topic, payload)=>{
-    console.log(act)
+   // console.log(act)
     await db.logSendedMQTTMessage.create({storageId:act.storageId,
                                           deviceId:act.sensorId,
                                           actId:act.id,

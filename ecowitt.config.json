@@ -1,0 +1,13 @@
+{
+    "devices":[
+        {
+            "cod_device":"THGrow01_FROG",
+            "stationtype":"GW1100A_V2.4.4",
+            "type":"S",
+            "passkey":"FFA2676B1775B9D504984EE72DA43DD0",
+            "temp":["tempinf","F"],
+            "hume":["humidityin"],
+            "topic":"mushborg/THGrow01_FROG/data"
+        }
+    ]
+}

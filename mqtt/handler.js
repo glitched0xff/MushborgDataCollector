@@ -1,7 +1,10 @@
 const { z } = require('zod');
 const db = require("../db");
 const {checkAndSendMQTTAct}=require("./handlerActuator")
+const {checkAndSendAllarm}=require("./handlerAllarm")
 const {socketSendMessage}=require("../module/socketHandler")
+let lastUpdate= Date.now();
+let debounchTime=5000
 
 const schema = z.object({
     cod_device:z.string(),
@@ -40,10 +43,10 @@ module.exports = async function handleMessage(topic, message) {
     } else {
       data=data.data; 
     }
-    console.log(data)
+  //  console.log(data)
     // Creazione del sensore se non presente
     let sensorRecord= await db.device.count({where:{cod_device:data.cod_device,type:data.type,active:1}})
-    console.log(sensorRecord)
+   // console.log(sensorRecord)
 
     if(sensorRecord==0){
       let presentFied={
@@ -81,7 +84,7 @@ module.exports = async function handleMessage(topic, message) {
 
     let device= await db.device.findOne({where:{cod_device:data.cod_device},attribute:["id","sorageId"]})
     // Inserimento messaggio
-    
+    // Ricevo un messaggio da un sensore S, lo inserisco nel db e controllo attuatori e allarmi
     if (device.type=="S"){
       await db.sensorData.create({
         cod_device:data.cod_device,
@@ -115,36 +118,23 @@ module.exports = async function handleMessage(topic, message) {
       if (allarms.length>0){
         for (let i = 0; i < allarms.length; i++) {
           const all = allarms[i];
-          let allarmOn=0
-          switch (all.operator) {
-            case "==":
-              allarmOn= data[all.referenceField] == all.threshold ?1:0
-              break;
-            case "=!":
-              allarmOn= data[all.referenceField] != all.threshold ?1:0
-              break;
-            case "<=":
-              allarmOn= data[all.referenceField]<=  all.threshold ?1:0
-              break;
-            case ">=":
-              allarmOn=data[all.referenceField]  >= all.threshold ?1:0
-              break;
-            case ">":
-              allarmOn= data[all.referenceField] > all.threshold ?1:0
-              break;
-            case "<":
-            //console.log(all.threshold , data[all.referenceField])
-              allarmOn=  data[all.referenceField] < all.threshold ?1:0
-             // topic
-
-              break;
-          }
-          //console.log(allarmOn)
-          await db.associateAllarm.update({inUse:allarmOn},{where:{id:all.id}})
-                                  .catch(err=>{console.log(err)})
-          await socketSendMessage("data","update")
+          await checkAndSendAllarm(JSON.parse(JSON.stringify(all)),data)
         }
       }
       }
+
   }
+  
+  // console.log("----")
+  // console.log(lastUpdate)
+  // console.log((Date.now() - lastUpdate >= debounchTime))
+  // console.log(Date.now() - lastUpdate)
+  // console.log(debounchTime)
+  // console.log("----")
+  if (Date.now() - lastUpdate >= debounchTime) {
+      console.log("socket")
+      await socketSendMessage("data",true)
+      lastUpdate = Date.now();
+  }
+
 };
