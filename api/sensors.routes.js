@@ -75,7 +75,7 @@ router.post('/rxEcowitt',async (req,res)=>{
         cod_device:dev.cod_device,
         type:dev.type,
         temp:ecowittData[dev.temp[0]]?parseFloat(ecowittData[dev.temp[0]]):null,
-        hume:ecowittData[dev.hume]?parseFloat(ecowittData[dev.hume]):null,
+        hume:ecowittData[dev.hume[0]]?parseFloat(ecowittData[dev.hume[0]]):null,
         hums:ecowittData[dev.hums]?parseFloat(ecowittData[dev.hums]):null,
         wind:ecowittData[dev.wind]?parseFloat(ecowittData[dev.wind]):null,
         levl:ecowittData[dev.levl]?parseFloat(ecowittData[dev.levl]):null,
