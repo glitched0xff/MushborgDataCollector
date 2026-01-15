@@ -69,7 +69,7 @@ router.post('/rxEcowitt',async (req,res)=>{
     //console.log(dev)
     if (ecowittData.PASSKEY==dev.passkey){
       //console.log(ecowittData[dev.temp[0]])
-      if (dev.temp[1]=="F"){ ecowittData[dev.temp[0]]=(((parseFloat(ecowittData[dev.temp[0]])-32)*5)/9).toPrecision(2)}
+      if (dev.temp[1]=="F"){ ecowittData[dev.temp[0]]=(((ecowittData[dev.temp[0]])-32)*5)/9}
       //console.log(ecowittData[dev.temp[0]])
       let payload={
         cod_device:dev.cod_device,
