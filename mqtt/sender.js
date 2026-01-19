@@ -12,6 +12,9 @@ module.exports = async function sendMessage(topic, message) {
             console.log(topic)
             console.log(message)
             console.log(typeof message)
+            if (typeof message=="object"){
+              message=JSON.stringify(message)
+            }
            mqttClient.publish(topic,message,{ qos: 1 },err => {
             console.log("published")
           if (err) {
