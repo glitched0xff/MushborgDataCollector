@@ -12,7 +12,7 @@ client.on('connect', () => {
 });
 
 client.on('message', (topic, payload) => {
-  console.log(topic)
+  //console.log(topic)
   handleMessage(topic, payload.toString());
 });
 

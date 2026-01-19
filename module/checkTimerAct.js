@@ -4,7 +4,7 @@ const {checkAndSendMQTTAct}=require("../mqtt/handlerActuator")
 async function checkValueInDb() {
     console.log("timer")
   try {
-    const timerAct = await db.associateActuator.findAll({where:{flagClock:1}});
+    const timerAct = await db.associateActuator.findAll({where:{flagClock:1,active:1}});
     if (timerAct.length>0){
         timerAct.forEach(act => {
             console.log('Attuatore trovato invio MQTT');

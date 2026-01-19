@@ -102,8 +102,9 @@ module.exports = async function handleMessage(topic, message) {
       })
 
       /** check attuatori */
-      let actuators=await db.associateActuator.findAll({where:{referenceSensorId:device.id,active:1}})
-      //console.log(JSON.parse(JSON.stringify(actuators)))
+      let actuators=await db.associateActuator.findAll({where:{referenceSensorId:device.id,active:1,flagInterval:1}})
+      
+      console.log(JSON.parse(JSON.stringify(actuators)))
       if (actuators.length>0){
         for (let i = 0; i < actuators.length; i++) {
           const act = actuators[i];
@@ -112,7 +113,7 @@ module.exports = async function handleMessage(topic, message) {
       }
 
       /** check allarmi */
-      let allarms=await db.associateAllarm.findAll({where:{referenceSensorId:device.id,active:1}})
+      let allarms=await db.associateAllarm.findAll({where:{referenceSensorId:device.id,active:11}})
       //console.log(JSON.parse(JSON.stringify(allarms)))
       
       if (allarms.length>0){

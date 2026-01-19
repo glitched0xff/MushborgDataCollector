@@ -5,35 +5,35 @@ const {logOutMqtt}=require("../module/logMushborgDC")
 const moment=require("moment")
 
 const checkAndSendMQTTAct =async(act,data)=>{
-    // console.log(act)
-    // console.log(data)
+    //  console.log(act.label)
+    //  console.log(data)
     if (act.flagInterval==1) {
         //console.log((data[act.referenceField]+" "+act.valMin))
         if ((data[act.referenceField])&&(data[act.referenceField]<act.valMin)){
             if(act.inUse==0){
+                    console.log(act.payloadType)
+
                 console.log("accendo")
-                let payload=act.switch
-                sender(act.topicMqtt,{relay:act.switch})
+                if (act.payloadType=="JSON"){
+                    sender(act.topicMqtt,JSON.parse(act.payloadMqttON))
+                } else if (act.payloadType=="PLAINTEXT"){
+                    sender(act.topicMqtt,act.payloadMqttON)
+                }
                 await db.associateActuator.update({inUse:1},{where:{id:act.id}}).catch(err=>{console.log(err)})
-                await logOutMqtt(act,act.topicMqtt,payload)
+                await logOutMqtt(act,act.topicMqtt,act.payloadMqttON?act.payloadMqttON:"")
             }else{
                 console.log("già acceso")
             }
         }else if((data[act.referenceField])&&(data[act.referenceField]>act.valMax)){
             if(act.inUse==1){
-                console.log("spengo")
-                let payload
-                switch (act.switch) {
-                    case 1:
-                        payload=0
-                        break;
-                    case true:
-                        payload=false
-                        break;
+                console.log("accendo")
+                if (act.payloadType=="JSON"){
+                    sender(act.topicMqtt,JSON.parse(act.payloadMqttOFF))
+                } else if (act.payloadType=="PLAINTEXT"){
+                    sender(act.topicMqtt,act.payloadMqttOFF)
                 }
-                sender(act.topicMqtt,{relay:payload})
                 await db.associateActuator.update({inUse:0},{where:{id:act.id}}).catch(err=>{console.log(err)})
-                await logOutMqtt(act,act.topicMqtt,payload)
+                await logOutMqtt(act,act.topicMqtt,act.payloadMqttOFF?act.payloadMqttOFF:"")
             } else{
                 console.log("già spento")
             }
@@ -55,23 +55,25 @@ const checkAndSendMQTTAct =async(act,data)=>{
                 });
 
         if (now.isBetween(timeOn, timeOff)){
-            let payload=act.switch
-            sender(act.topicMqtt,{relay:act.switch})
-            await db.associateActuator.update({inUse:1},{where:{id:act.id}}).catch(err=>{console.log(err)})
-            await logOutMqtt(act,act.topicMqtt,payload)
-        }else{
-            let payload
-                switch (act.switch) {
-                    case 1:
-                        payload=0
-                        break;
-                    case true:
-                        payload=false
-                        break;
+             if(act.inUse==0){
+                if (act.payloadType=="JSON"){
+                    sender(act.topicMqtt,JSON.parse(act.payloadMqttON))
+                } else if (act.payloadType=="PLAINTEXT"){
+                    sender(act.topicMqtt,act.payloadMqttON?act.payloadMqttON:"")
                 }
-                sender(act.topicMqtt,{relay:payload})
-                await db.associateActuator.update({inUse:0},{where:{id:act.id}}).catch(err=>{console.log(err)})
-                await logOutMqtt(act,act.topicMqtt,payload)
+                await db.associateActuator.update({inUse:1},{where:{id:act.id}}).catch(err=>{console.log(err)})
+                await logOutMqtt(act,act.topicMqtt,act.payloadMqttON)
+                }
+            }else{
+                if(act.inUse==1){
+                    if (act.payloadType=="JSON"){
+                        sender(act.topicMqtt,JSON.parse(act.payloadMqttOFF))
+                    } else if (act.payloadType=="PLAINTEXT"){
+                        sender(act.topicMqtt,act.payloadMqttOFF)
+                    }
+                    await db.associateActuator.update({inUse:0},{where:{id:act.id}}).catch(err=>{console.log(err)})
+                    await logOutMqtt(act,act.topicMqtt,act.payloadMqttOFF?act.payloadMqttOFF:"")
+                }
         }
     }
 }
