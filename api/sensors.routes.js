@@ -5,6 +5,20 @@ const ALLOWED_PREFIX = 'sensors/';
 const router = express.Router();
 const ecowittConfig=require("../ecowitt.config.json")
 const sender=require("../mqtt/sender") //MQTT
+const lastSentMap = new Map();
+const DEBOUNCE_TIME = 120 * 1000; // 240 secondi
+/** Function for debounch/throttle server side */
+function canSend(deviceId) {
+  const now = Date.now();
+  const last = lastSentMap.get(deviceId) || 0;
+
+  if (now - last >= DEBOUNCE_TIME) {
+    lastSentMap.set(deviceId, now);
+    return true;
+  }
+  return false;
+}
+
 /**
  * Latest message
  */
@@ -62,40 +76,34 @@ router.get('/sendMessage', (req, res) => {
 
 
 router.post('/rxEcowitt',async (req,res)=>{
-  //console.log(req.body)
-  //console.log(ecowittConfig)
-  let ecowittData=req.body
-  ecowittConfig.devices.forEach(async dev => {
-    //console.log(dev)
-    if (ecowittData.PASSKEY==dev.passkey){
-      //console.log(ecowittData[dev.temp[0]])
-      if (dev.temp[1]=="F"){ ecowittData[dev.temp[0]]=(((ecowittData[dev.temp[0]])-32)*5)/9}
-      //console.log(ecowittData[dev.temp[0]])
-      let payload={
-        cod_device:dev.cod_device,
-        type:dev.type,
-        temp:ecowittData[dev.temp[0]]?parseFloat(ecowittData[dev.temp[0]]):null,
-        hume:ecowittData[dev.hume[0]]?parseFloat(ecowittData[dev.hume[0]]):null,
-        hums:ecowittData[dev.hums]?parseFloat(ecowittData[dev.hums]):null,
-        wind:ecowittData[dev.wind]?parseFloat(ecowittData[dev.wind]):null,
-        levl:ecowittData[dev.levl]?parseFloat(ecowittData[dev.levl]):null,
-        ligh:ecowittData[dev.ligh]?parseFloat(ecowittData[dev.ligh]):null,
-        co2:ecowittData[dev.co2]?parseFloat(ecowittData[dev.co2]):null
-      }
-      //console.log(payload)
-      //pulisco il payload
-      for(let key in payload){
-        if(payload[key]==null){delete payload[key]}
-      }
-      console.log("Ecowitt "+dev.cod_device)
-      console.log(payload)
-
-      await sender(dev.topic,payload)
+  let ecowittData = req.body;
+  for (const dev of ecowittConfig.devices) {
+    if (ecowittData.PASSKEY !== dev.passkey) continue;
+    if (!canSend(dev.cod_device)) {
+      console.log(`SKIP ${dev.cod_device} (debounce)`);
+      continue;
     }
-  });
-
-  res.status(200).json(req.body)
-
+    if (dev.temp[1] === "F" && ecowittData[dev.temp[0]]) {
+      ecowittData[dev.temp[0]] =
+        ((ecowittData[dev.temp[0]] - 32) * 5) / 9;
+    }
+    let payload = {
+      cod_device: dev.cod_device,
+      type: dev.type,
+      temp: ecowittData[dev.temp[0]] ? parseFloat(ecowittData[dev.temp[0]]) : null,
+      hume: ecowittData[dev.hume[0]] ? parseFloat(ecowittData[dev.hume[0]]) : null,
+      hums: ecowittData[dev.hums] ? parseFloat(ecowittData[dev.hums]) : null,
+      wind: ecowittData[dev.wind] ? parseFloat(ecowittData[dev.wind]) : null,
+      levl: ecowittData[dev.levl] ? parseFloat(ecowittData[dev.levl]) : null,
+      ligh: ecowittData[dev.ligh] ? parseFloat(ecowittData[dev.ligh]) : null,
+      co2: ecowittData[dev.co2] ? parseFloat(ecowittData[dev.co2]) : null
+    };
+    // pulizia payload
+    Object.keys(payload).forEach(k => payload[k] == null && delete payload[k]);
+    console.log("Ecowitt", dev.cod_device, payload);
+    await sender(dev.topic, payload);
+  }
+  res.status(200).json({ ok: true });
 })
 
 module.exports = router;
