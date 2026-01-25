@@ -36,6 +36,8 @@ const isValidJSON = (text) => {
 }
 
 module.exports = async function handleMessage(topic, message) {
+  // console.log(topic)
+  // console.log(message)
   if (isValidJSON(message)){
     let data = schema.safeParse(JSON.parse(message));
     if (!data.success) {
