@@ -13,8 +13,8 @@ function parseZigBeeTHSonoff(topic,inputJson) {
     temperature: 'temp',
     humidity: 'hume',
     humidity_calibration: 'hums',
-    battery:'battery'
-    // other fields
+    battery:'battery',
+    co2:'co2'
   };
   const output = {
     temp: 0,
