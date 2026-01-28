@@ -6,14 +6,14 @@ const {socketSendMessage}=require("../module/socketHandler")
 let lastUpdate= Date.now();
 let debounchTime=5000
 // Funzione di Prsing per sonoff TH
-function parseZigBeeTHSonoff(inputJson) {
+function parseZigBeeTHSonoff(topic,inputJson) {
    inputJson=JSON.parse(inputJson)
-   console.log(inputJson)
+   //console.log(inputJson)
   const fieldMap = {
     temperature: 'temp',
     humidity: 'hume',
     humidity_calibration: 'hums',
-    battery:'batt'
+    battery:'battery'
     // other fields
   };
   const output = {
@@ -30,13 +30,12 @@ function parseZigBeeTHSonoff(inputJson) {
       output[targetKey] = inputJson[sourceKey];
     }
     }
+    output.cod_device=topic.split("/")[2]
   return output;
 }
 
-
 const schema = z.object({
     cod_device:z.string(),
-    type:z.string(),
     temp:z.number().optional(),
     hume:z.number().optional(),
     hums:z.number().optional(),
@@ -44,6 +43,7 @@ const schema = z.object({
     levl:z.number().optional(),
     ligh:z.number().optional(),
     co2:z.number().optional(),
+    battery:z.number().optional(),
 });
 
 const isValidJSON = (text) => {
@@ -52,7 +52,6 @@ const isValidJSON = (text) => {
   if (typeof text !== 'string' || (typeof text === 'string' && text.length === 0)) {
     return isValid;
   }
-
   try {
     JSON.parse(text);
     isValid = true;
@@ -64,21 +63,22 @@ const isValidJSON = (text) => {
 }
 
 module.exports = async function handlerZig2Mqtt(topic, message) {
-  console.log(topic.split("/")[2])
+  
   if (topic.split("/")[2]!="bridge"){
-    let messageParsed=parseZigBeeTHSonoff(message)
+    let messageParsed=await parseZigBeeTHSonoff(topic,message)
     console.log(messageParsed)
-    if (isValidJSON(messageParsed)){
-      let data = schema.safeParse(JSON.parse(messageParsed));
+    if (isValidJSON(JSON.stringify(messageParsed))){
+      let data = schema.safeParse(messageParsed);
+      // console.log("data")
       if (!data.success) {
         return false // ZodError instance
       } else {
         data=data.data; 
       }
-    //  console.log(data)
+      // console.log(data)
       // Creazione del sensore se non presente
-      let sensorRecord= await db.device.count({where:{cod_device:data.cod_device,type:data.type,active:1}})
-    // console.log(sensorRecord)
+      let sensorRecord= await db.device.count({where:{cod_device:data.cod_device,active:1}})
+   console.log(sensorRecord)
 
       if(sensorRecord==0){
         let presentFied={
@@ -89,6 +89,7 @@ module.exports = async function handlerZig2Mqtt(topic, message) {
           levl:0,
           ligh:0,
           wind:0,
+          battery:0,
         }
         const field = Object.keys(data);
         if (field.includes("temp")){presentFied.temp=1}
@@ -98,6 +99,9 @@ module.exports = async function handlerZig2Mqtt(topic, message) {
         if (field.includes("levl")){presentFied.levl=1}
         if (field.includes("ligh")){presentFied.ligh=1}
         if (field.includes("wind")){presentFied.wind=1}
+        if (field.includes("battery")){presentFied.battery=1}
+        // console.log("present filed")
+        // console.log(data)
         await db.device.create({
           cod_device:data.cod_device,
           type:data.type,
@@ -114,7 +118,7 @@ module.exports = async function handlerZig2Mqtt(topic, message) {
         })
       }
 
-      let device= await db.device.findOne({where:{cod_device:data.cod_device},attribute:["id","sorageId"]})
+      let device= await db.device.findOne({where:{cod_device:data.cod_device}})
       // Inserimento messaggio
       // Ricevo un messaggio da un sensore S, lo inserisco nel db e controllo attuatori e allarmi
       if (device.type=="S"){
@@ -156,6 +160,8 @@ module.exports = async function handlerZig2Mqtt(topic, message) {
         }
         }
 
+    }else{
+      console.log("Errore")
     }
   }
  
