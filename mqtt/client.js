@@ -14,7 +14,7 @@ client.on('connect', () => {
 
 client.on('message', (topic, payload) => {
 
-  if ((topic.split("/")[0]=="mushborg")&&(topic.split("/")[1]=="zig2mqtt")){
+  if ((topic.split("/")[0]=="mushborg")&&(topic.split("/")[1]=="zigbee2mqtt")){
     handlerZig2Mqtt(topic, payload.toString())
     
 
