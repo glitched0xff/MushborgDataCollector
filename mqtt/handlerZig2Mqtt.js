@@ -8,8 +8,8 @@ let debounchTime=5000
 // Funzione di Prsing per sonoff TH
 function parseZigBeeTHSonoff(topic,inputJson) {
    inputJson=JSON.parse(inputJson)
-   //console.log(inputJson)
-   
+   console.log(inputJson)
+
   const fieldMap = {
     temperature: 'temp',
     humidity: 'hume',
