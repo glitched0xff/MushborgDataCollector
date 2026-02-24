@@ -64,7 +64,8 @@ const isValidJSON = (text) => {
 }
 
 module.exports = async function handlerZig2Mqtt(topic, message) {
-  
+  console.log(topic)
+  console.log(message)
   if (topic.split("/")[2]!="bridge"){
     let messageParsed=await parseZigBeeTHSonoff(topic,message)
     console.log(messageParsed)
