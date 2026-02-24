@@ -77,6 +77,8 @@ router.get('/sendMessage', (req, res) => {
 
 router.post('/rxEcowitt',async (req,res)=>{
   let ecowittData = req.body;
+  console.log("EcoWitt")
+  console.log(ecowittData)
   for (const dev of ecowittConfig.devices) {
     if (ecowittData.PASSKEY !== dev.passkey) continue;
     if (!canSend(dev.cod_device)) {
