@@ -13,7 +13,7 @@ client.on('connect', () => {
 });
 
 client.on('message', (topic, payload) => {
-
+  console.log(topic,payload)
   if ((topic.split("/")[0]=="mushborg")&&(topic.split("/")[1]=="zig2mqtt")){
     handlerZig2Mqtt(topic, payload.toString())
   }else{
