@@ -1,6 +1,7 @@
 const mqtt = require('mqtt');
 const handleMessage = require('./handler');
 const handlerZig2Mqtt=require('./handlerZig2Mqtt')
+const moment=require("moment")
 
 const client = mqtt.connect(process.env.MQTT_BROKER, {
   username: process.env.MQTT_USERNAME,
@@ -13,7 +14,7 @@ client.on('connect', () => {
 });
 
 client.on('message', (topic, payload) => {
-  console.log("--OnMessage")
+  console.log("--OnMessage "+ moment().format("DD-MM-YY HH:mm:ss").toString())
   console.log(topic,payload)
   if ((topic.split("/")[0]=="mushborg")&&(topic.split("/")[1]=="zig2mqtt")){
     handlerZig2Mqtt(topic, payload.toString())
